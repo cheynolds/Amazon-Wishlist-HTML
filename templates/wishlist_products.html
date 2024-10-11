@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Products for {{ wishlist_name }}</h1>
+<!-- In Stock Toggle Button -->
+<button class="toggle-button" id="toggleInStock" onclick="toggleInStock()">Show In Stock Only</button>
+
+    <div class="product-grid">
+		{% for product in products %}
+		            {% include '_product.html' %}
+		{% endfor %}
+    </div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+	
+    function toggleInStock() {
+        const button = document.getElementById('toggleInStock');
+        const products = document.querySelectorAll('.product');
+        const isShowingInStock = button.classList.toggle('active');
+
+        // Toggle button text
+        button.textContent = isShowingInStock ? "Show All Products" : "Show In Stock Only";
+
+        // Loop through each product and hide/show based on stock status
+        products.forEach(product => {
+            const stockStatus = product.getAttribute('data-stock-status');
+            if (isShowingInStock && stockStatus !== 'In Stock') {
+                product.style.display = 'none';  // Hide out of stock
+            } else {
+                product.style.display = 'block'; // Show all or in stock
+            }
+        });
+    }
+</script>
+{% endblock %}

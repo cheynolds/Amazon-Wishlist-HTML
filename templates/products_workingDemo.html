@@ -18,9 +18,13 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ product['title'] }}</h5>
                         <p class="card-text">{{ product['subtitle'] }}</p>
-                        <p class="card-text"><strong>Price:</strong> ${{ product['price'] }}</p>
+                        <p class="card-text"><strong>Current Price:</strong> ${{ product['price'] }}</p>
+                        <p class="card-text"><strong>Last Price Change:</strong> ${{ product['last_pricechange'] }} ({{ product['last_pricechange_percent'] }})</p>
+						
                         <p class="card-text"><strong>Reviews:</strong> {{ product['reviews'] }}</p>
                         <p class="card-text"><strong>Stars:</strong> {{ product['stars'] }} / 5</p>
+                        <p class="card-text"><strong>Price When Added:</strong> ${{ product['price_added'] }} on {{ product['date_added'] }}</p>
+						
                         <a href="{{ product['product_link'] }}" class="btn btn-primary" target="_blank">View Product</a>
                     </div>
                 </div>

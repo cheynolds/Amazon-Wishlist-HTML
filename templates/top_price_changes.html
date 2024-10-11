@@ -1,22 +1,25 @@
 {% extends 'base.html' %}
 
-{% block title %}Product List{% endblock %}
-
 {% block content %}
-    <h1>Product List</h1>
+<h1>Top 100 Price Changes</h1>
 
-    <!-- In Stock Toggle Button -->
-    <button class="toggle-button" id="toggleInStock" onclick="toggleInStock()">Show In Stock Only</button>
+<!-- In Stock Toggle Button -->
+<button class="toggle-button" id="toggleInStock" onclick="toggleInStock()">Show In Stock Only</button>
 
-    <!-- Product Grid -->
-    <div class="product-grid" id="product-grid">
-        {% for product in products %}
-            {% include '_product.html' %}
-        {% endfor %}
-    </div>
+<div class="product-grid" id="product-grid">
+    {% for product in products %}
+        {% include '_product.html' %}
+    {% endfor %}
+</div>
 
-    <!-- Scroll to Top Button -->
-    <button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()">▲ Go to Top</button>
+<!-- Loading Spinner -->
+<div id="loading" style="display: none;">
+    <p>Loading more products...</p>
+</div>
+
+<!-- Scroll to Top Button -->
+<button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()">▲ Go to Top</button>
+
 {% endblock %}
 
 {% block scripts %}
@@ -24,14 +27,14 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         let currentPage = 1;
-        const maxProducts = 3000;  // Adjust this according to your actual limit
+        const maxProducts = 100;
         const productsPerPage = 20;
-
+        
         attachInfiniteScroll(() => {
             if (currentPage * productsPerPage >= maxProducts) return Promise.resolve(); // Stop if max products reached
             currentPage += 1;
 
-            return fetch(`/api/products?page=${currentPage}`, {
+            return fetch(`/top_price_changes?page=${currentPage}`, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(response => response.json())
@@ -50,6 +53,7 @@
                         <img src="${product.image_url}" alt="${product.title}">
                         <h3>${product.title}</h3>
                         <p><strong>Price:</strong> $${product.price}</p>
+                        <p><strong>Last Price Change:</strong> $${product.last_pricechange} (${product.last_pricechange_percent}%)</p>
                         <p><strong>Stars:</strong> ${product.stars} ★</p>
                         <p><strong>Status:</strong> ${product.stock_status === 'In Stock' ? 'In Stock' : 'Out of Stock'}</p>
                         <div class="product-button-container">
@@ -62,4 +66,3 @@
     });
 </script>
 {% endblock %}
-

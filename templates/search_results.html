@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+<h1>Search Results for "{{ search_query }}"</h1>
+<!-- In Stock Toggle Button -->
+<button class="toggle-button" id="toggleInStock" onclick="toggleInStock()">Show In Stock Only</button>
+
+<!-- Product Grid -->
+<div class="product-grid">
+    {% if products %}
+        {% for product in products %}
+            {% include '_product.html' %}
+        {% endfor %}
+    {% else %}
+        <p>No products found for "{{ search_query }}".</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Attach infinite scroll for search results page
+    attachInfiniteScroll('/search', 'product-grid', 200);
+</script>
+{% endblock %}
+
+    

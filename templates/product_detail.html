@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.title }}{% endblock %}
+
+{% block content %}
+    <h1>{{ product.title }}</h1>
+
+    <!-- Product Detail Grid -->
+    <div class="product-detail-grid">
+        <!-- Product Information Box -->
+        <div class="product-detail-box">
+            <img src="{{ product.image_url }}" alt="{{ product.title }}">
+            <h3>{{ product.title }}</h3>
+            <p><strong>Price:</strong> ${{ product.price }}</p>
+            <p><strong>Last Price Change:</strong> 
+                <span class="last-price-change">${{ product.last_pricechange }}</span> 
+                ({{ product.last_pricechange_percent }}%)
+            </p>
+            <p><strong>Stars:</strong> {{ product.stars }} ★</p>
+            <p><strong>Status:</strong> 
+                {% if product.stock_status == 'In Stock' %}
+                    In Stock
+                {% else %}
+                    Out of Stock
+                {% endif %}
+            </p>
+            <a href="{{ product.product_link }}" target="_blank">View on Amazon</a>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="product-chart-box">
+            <h2>Pricing History</h2>
+            <canvas id="priceHistoryChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Retrieve the pricing history data passed from the Flask backend
+    var historyData = {{ history_data|tojson }};
+
+    // Setup the chart
+    var ctx = document.getElementById('priceHistoryChart').getContext('2d');
+    var priceHistoryChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: historyData.dates,  // X-axis (dates)
+            datasets: [{
+                label: 'Price Over Time',
+                data: historyData.prices,  // Y-axis (prices)
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: false
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Price (USD)'
+                    },
+                    beginAtZero: false
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
