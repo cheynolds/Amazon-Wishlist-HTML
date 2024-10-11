@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .product-container {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .product-image {
+            max-width: 150px;
+            max-height: 150px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .product-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .product-link {
+            display: block;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Product List</h1>
+    
+    {% for product in products %}
+        <div class="product-container">
+            <h2 class="product-title">{{ product['title'] }}</h2>
+            <p><strong>ASIN:</strong> {{ product['asin'] }}</p>
+            <p><strong>Subtitle:</strong> {{ product['subtitle'] }}</p>
+            <p><strong>Price:</strong> ${{ product['price'] }}</p>
+            <p><strong>Stock Status:</strong> {{ product['stock_status'] }}</p>
+            <p><strong>Date Added:</strong> {{ product['date_added'] }}</p>
+            <p><strong>Stars:</strong> {{ product['stars'] }} out of 5</p>
+            <p><strong>Reviews:</strong> {{ product['reviews'] }}</p>
+            <p><strong>Pattern:</strong> {{ product['pattern'] }}</p>
+            <p><strong>Style:</strong> {{ product['style'] }}</p>
+            <p><strong>Wishlist:</strong> {{ product['wishlist_name'] }}</p>
+
+            <img src="{{ product['image_url'] }}" alt="Product Image" class="product-image">
+            <a href="{{ product['product_link'] }}" target="_blank" class="product-link">View on Amazon</a>
+        </div>
+    {% else %}
+        <p>No products found.</p>
+    {% endfor %}
+</body>
+</html>
