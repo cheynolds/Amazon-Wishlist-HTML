@@ -277,7 +277,7 @@ def product_detail(asin):
 
     # Ensure we have the current price and last_checkdate as part of the history
     current_price = product[3]  # Price
-    last_checkdate = product[16].strftime('%Y-%m-%d') if product[16] else None  # Last price check date
+    last_checkdate = product[17].strftime('%Y-%m-%d') if product[17] else None  # Last price check date
 
     # Build history data including price_added, date_added, and current price
     history_data = {
@@ -301,12 +301,12 @@ def product_detail(asin):
         "pattern": product[11],
         "style": product[12],
         "wishlist_name": product[13],
-        "date_added": product[14].strftime('%Y-%m-%d'),
+        "date_added": product[14].strftime('%Y-%m-%d') if product[14] else None,
         "last_pricechange": product[15],
-        "last_pricechange_percent": product[16],
-        "last_checkdate": last_checkdate  # Adding last check date
+        "last_pricechange_percent": float(product[16]) if product[16] is not None else None,  # Handle decimal value
+        "last_checkdate": product[17].strftime('%Y-%m-%d') if product[17] else None  # Last price check date
     }
-
+    
     cursor.close()
     conn.close()
 
