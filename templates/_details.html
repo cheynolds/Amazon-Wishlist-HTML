@@ -1,0 +1,26 @@
+<div class="product-detail-box">
+    <img src="{{ product.image_url }}" alt="{{ product.title }}">
+    <h3>{{ product.title }}</h3>
+    <p><strong>Price:</strong> ${{ product.price }}</p>
+    <p><strong>Subtitle:</strong> {{ product.subtitle }}</p>
+    <p><strong>Reviews:</strong> {{ product.reviews }}</p>
+    <p><strong>Stars:</strong> {{ product.stars }} ★</p>
+    <p><strong>Status:</strong> 
+        {% if product.stock_status == 'In Stock' %}
+            In Stock
+        {% else %}
+            Out of Stock
+        {% endif %}
+    </p>
+    <p><strong>Pattern:</strong> {{ product.pattern }}</p>
+    <p><strong>Style:</strong> {{ product.style }}</p>
+    <p><strong>Wishlist Name:</strong> {{ product.wishlist_name }}</p>
+    <p><strong>Affiliate Link:</strong> <a href="{{ product.affiliate_link }}" target="_blank">Affiliate Link</a></p>
+    <p><strong>Date Added:</strong> {{ product.date_added }}</p>
+    <p><strong>Price Added:</strong> ${{ product.price_added }}</p>
+    <p><strong>Last Price Change:</strong> 
+        <span class="last-price-change">${{ product.last_pricechange }}</span> 
+        ({{ product.last_pricechange_percent }}%)
+    </p>
+    <a href="{{ product.product_link }}" target="_blank">View on Amazon</a>
+</div>

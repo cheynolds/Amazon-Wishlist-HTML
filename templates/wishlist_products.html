@@ -2,36 +2,76 @@
 
 {% block content %}
     <h1>Products for {{ wishlist_name }}</h1>
-<!-- In Stock Toggle Button -->
-<button class="toggle-button" id="toggleInStock" onclick="toggleInStock()">Show In Stock Only</button>
 
-    <div class="product-grid">
-		{% for product in products %}
-		            {% include '_product.html' %}
-		{% endfor %}
+    <!-- In Stock Toggle Button -->
+    <button class="toggle-button" id="toggleInStock" onclick="toggleInStock()">Show In Stock Only</button>
+
+    <div class="product-grid" id="product-grid">
+        {% for product in products %}
+            {% include '_product.html' %}
+        {% endfor %}
     </div>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()">▲ Go to Top</button>
+
+    <!-- Loading Spinner -->
+    <div id="loading" style="display: none;">
+        <p>Loading more products...</p>
+    </div>
+
 {% endblock %}
+
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script>
-	
-    function toggleInStock() {
-        const button = document.getElementById('toggleInStock');
-        const products = document.querySelectorAll('.product');
-        const isShowingInStock = button.classList.toggle('active');
+    let currentPage = 1;
+    const productsPerPage = 20;
+    let isInStockOnly = false;  // Track if the in-stock filter is active
 
-        // Toggle button text
-        button.textContent = isShowingInStock ? "Show All Products" : "Show In Stock Only";
+    // Infinite scroll logic
+    attachInfiniteScroll(() => {
+        currentPage += 1;
+        const url = `/wishlist/{{ wishlist_name }}?page=${currentPage}&in_stock=${isInStockOnly ? 1 : 0}`;
 
-        // Loop through each product and hide/show based on stock status
-        products.forEach(product => {
-            const stockStatus = product.getAttribute('data-stock-status');
-            if (isShowingInStock && stockStatus !== 'In Stock') {
-                product.style.display = 'none';  // Hide out of stock
-            } else {
-                product.style.display = 'block'; // Show all or in stock
+        return fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const productGrid = document.getElementById('product-grid');
+            if (!productGrid) {
+                console.error("product-grid element not found.");
+                return;
             }
+
+            data.forEach(product => {
+                const productDiv = document.createElement('div');
+                productDiv.classList.add('product');
+                productDiv.setAttribute('data-stock-status', product.stock_status);
+                productDiv.innerHTML = `
+                    <img src="${product.image_url}" alt="${product.title}">
+                    <h3><a href="/product/${product.asin}">${product.title}</a></h3>
+                    <p><strong>Price:</strong> $${product.price}</p>
+                    <p><strong>Status:</strong> ${product.stock_status === 'In Stock' ? 'In Stock' : 'Out of Stock'}</p>
+                    <div class="product-button-container">
+                        <a href="${product.product_link}" target="_blank">View on Amazon</a>
+                    </div>`;
+                productGrid.appendChild(productDiv);
+            });
         });
-    }
+    });
+
+    // Toggle In Stock Filter
+    const toggleButton = document.getElementById('toggleInStock');
+    toggleButton.addEventListener('click', function() {
+        isInStockOnly = !isInStockOnly;
+        toggleButton.textContent = isInStockOnly ? "Show All Products" : "Show In Stock Only";
+
+        // Re-fetch the first page of products with the updated filter
+        currentPage = 1;
+        document.getElementById('product-grid').innerHTML = '';  // Clear existing products
+        loadMoreProducts(isInStockOnly);  // Load first page with filter applied
+    });
 </script>
 {% endblock %}

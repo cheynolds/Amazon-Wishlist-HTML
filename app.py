@@ -180,28 +180,44 @@ def api_products():
 
 @app.route('/products')
 def products():
-    # Fetch the current page (optional, initially 1)
-    page = 1
+    # Fetch the current page from the query parameters, default to 1
+    page = int(request.args.get('page', 1))
+    in_stock = int(request.args.get('in_stock', 0))  # Fetch the in_stock filter from query params, default is 0 (show all)
+
+    PRODUCTS_PER_PAGE = 20
+    offset = (page - 1) * PRODUCTS_PER_PAGE
 
     # Connect to the database
     conn, cursor = connect_to_db()
 
-    # Query to count the total number of products for pagination
-    cursor.execute("SELECT COUNT(*) FROM product_data")
+    # Query to count the total number of products (considering in stock filter)
+    if in_stock:
+        cursor.execute("SELECT COUNT(*) FROM product_data WHERE stock_status = 'In Stock'")
+    else:
+        cursor.execute("SELECT COUNT(*) FROM product_data")
     total_products = cursor.fetchone()[0]
 
-    # Query to fetch products for the first page
-    query = """
-    SELECT asin, title, price, stars, stock_status, image_url, product_link 
-    FROM product_data 
-    ORDER BY title ASC 
-    LIMIT %s OFFSET %s
-    """
-    offset = (page - 1) * PRODUCTS_PER_PAGE
+    # Query to fetch products for the current page (considering in stock filter)
+    if in_stock:
+        query = """
+            SELECT asin, title, price, stars, stock_status, image_url, product_link
+            FROM product_data
+            WHERE stock_status = 'In Stock'
+            ORDER BY title ASC
+            LIMIT %s OFFSET %s
+        """
+    else:
+        query = """
+            SELECT asin, title, price, stars, stock_status, image_url, product_link
+            FROM product_data
+            ORDER BY title ASC
+            LIMIT %s OFFSET %s
+        """
+
     cursor.execute(query, (PRODUCTS_PER_PAGE, offset))
     results = cursor.fetchall()
 
-    # Map the results to a dictionary to pass to the template
+    # Map the results to a dictionary
     products = [
         {
             'asin': row[0],
@@ -218,7 +234,14 @@ def products():
     cursor.close()
     conn.close()
 
+    # Check if it's an AJAX request (for infinite scroll)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(products)  # Return JSON data for infinite scroll
+
+    # Render the regular product page (initial load)
     return render_template('products.html', products=products, total_products=total_products, PRODUCTS_PER_PAGE=PRODUCTS_PER_PAGE)
+
+
 
 
 # Route for the index/home page
@@ -226,74 +249,64 @@ def products():
 def index():
     return redirect(url_for('products'))
 
-# @app.route('/product/<asin>')
-# def product_detail(asin):
-#     # Fetch product details
-#     product = get_product_by_asin(asin)
-#
-#     # Fetch pricing history for the product
-#     history_query = """
-#     SELECT price, updated_at FROM product_data_history WHERE asin = %s ORDER BY updated_at ASC
-#     """
-#     conn, cursor = connect_to_db()
-#     cursor.execute(history_query, (asin,))
-#     pricing_history = cursor.fetchall()
-#
-#     # Convert pricing history to JSON format for Chart.js
-#     history_data = {
-#         "prices": [row[0] for row in pricing_history],
-#         "dates": [row[1].strftime('%Y-%m-%d') for row in pricing_history]
-#     }
-#
-#     return render_template('product_detail.html', product=product, history_data=history_data)
 
+# Route for product detail pages, chart pricing data
 @app.route('/product/<asin>')
 def product_detail(asin):
-    # Connect to the database
     conn, cursor = connect_to_db()
 
-    # Fetch product details, including price_added and date_added
+    # Fetch all product details, including price and last_checkdate
     product_query = """
-    SELECT price_added, date_added, price, reviews, stars, stock_status, image_url, product_link, title
-    FROM product_data WHERE asin = %s
+    SELECT asin, title, subtitle, price, price_added, reviews, stars, stock_status, image_url, product_link, 
+           affiliate_link, pattern, style, wishlist_name, date_added, last_pricechange, last_pricechange_percent, last_checkdate
+    FROM product_data
+    WHERE asin = %s
     """
     cursor.execute(product_query, (asin,))
     product = cursor.fetchone()
 
-    # Fetch pricing history for the product
+    # Fetch pricing history
     history_query = """
-    SELECT price, updated_at FROM product_data_history WHERE asin = %s ORDER BY updated_at ASC
+    SELECT price, updated_at 
+    FROM product_data_history 
+    WHERE asin = %s 
+    ORDER BY updated_at ASC
     """
     cursor.execute(history_query, (asin,))
     pricing_history = cursor.fetchall()
 
-    # Add the initial price and date from the product_data table as the first point in the chart
-    if product:
-        price_added = product[0]
-        date_added = product[1].strftime('%Y-%m-%d') if product[1] else None
-    else:
-        price_added, date_added = None, None
+    # Ensure we have the current price and last_checkdate as part of the history
+    current_price = product[3]  # Price
+    last_checkdate = product[16].strftime('%Y-%m-%d') if product[16] else None  # Last price check date
 
-    # Convert pricing history to JSON format for Chart.js, including the added price and date
+    # Build history data including price_added, date_added, and current price
     history_data = {
-        "prices": [price_added] + [row[0] for row in pricing_history] if price_added else [row[0] for row in pricing_history],
-        "dates": [date_added] + [row[1].strftime('%Y-%m-%d') for row in pricing_history] if date_added else [row[1].strftime('%Y-%m-%d') for row in pricing_history]
+        "prices": [product[4]] + [row[0] for row in pricing_history] + [current_price],  # price_added + history + current price
+        "dates": [product[14].strftime('%Y-%m-%d')] + [row[1].strftime('%Y-%m-%d') for row in pricing_history] + [last_checkdate]  # date_added + history + last_checkdate
     }
 
-    # Map the product details to a dictionary to pass to the template
+    # Map the product details to a dictionary
     product_data = {
-        "title": product[8] if product else "Unknown Product",
-        "price": product[2] if product else "N/A",
-        "reviews": product[3] if product else "N/A",
-        "stars": product[4] if product else "N/A",
-        "stock_status": product[5] if product else "N/A",
-        "image_url": product[6] if product else "N/A",
-        "product_link": product[7] if product else "#",
-        "last_pricechange": None,  # You can add the logic to compute this if needed
-        "last_pricechange_percent": None  # You can add the logic to compute this if needed
+        "asin": product[0],
+        "title": product[1],
+        "subtitle": product[2],
+        "price": product[3],
+        "price_added": product[4],
+        "reviews": product[5],
+        "stars": product[6],
+        "stock_status": product[7],
+        "image_url": product[8],
+        "product_link": product[9],
+        "affiliate_link": product[10],
+        "pattern": product[11],
+        "style": product[12],
+        "wishlist_name": product[13],
+        "date_added": product[14].strftime('%Y-%m-%d'),
+        "last_pricechange": product[15],
+        "last_pricechange_percent": product[16],
+        "last_checkdate": last_checkdate  # Adding last check date
     }
 
-    # Close the database connection
     cursor.close()
     conn.close()
 
@@ -302,29 +315,32 @@ def product_detail(asin):
 
 
 
-
-
-
-
 @app.route('/top_price_changes')
 def top_price_changes():
     # Fetch the page number from query parameters, default to 1
     page = int(request.args.get('page', 1))
-    
+    in_stock_only = request.args.get('in_stock', '0') == '1'
+
     PRODUCTS_PER_PAGE = 20  # Define how many products per page
     offset = (page - 1) * PRODUCTS_PER_PAGE
 
-    # Fetch products from the database with limit and offset
+    # Connect to the database
     conn, cursor = connect_to_db()
-    cursor.execute("""
+
+    # Modify the query to filter by stock status if needed
+    query = """
         SELECT asin, title, price, last_pricechange, last_pricechange_percent, stars, stock_status, image_url, product_link
         FROM product_data
-        ORDER BY last_pricechange_percent ASC
-        LIMIT %s OFFSET %s
-    """, (PRODUCTS_PER_PAGE, offset))
+    """
+    if in_stock_only:
+        query += " WHERE stock_status = 'In Stock' "
+
+    query += " ORDER BY last_pricechange_percent ASC LIMIT %s OFFSET %s"
+
+    cursor.execute(query, (PRODUCTS_PER_PAGE, offset))
     
     products = cursor.fetchall()
-    
+
     # Convert to a list of dictionaries
     product_list = [
         {
@@ -352,6 +368,8 @@ def top_price_changes():
 
 
 
+
+
 @app.route('/categories')
 def categories():
     wishlists = get_wishlists()
@@ -359,28 +377,94 @@ def categories():
 
 @app.route('/wishlist/<wishlist_name>')
 def wishlist_products(wishlist_name):
-    # Fetch products by wishlist name, only if they're in stock
-    products = get_products_by_wishlist(wishlist_name, in_stock=True)
-    return render_template('wishlist_products.html', products=products, wishlist_name=wishlist_name)
+    # Fetch the current page from the query parameters, default to 1
+    page = int(request.args.get('page', 1))
+    in_stock = int(request.args.get('in_stock', 0))  # 0 = Show all products, 1 = Show in-stock only
+
+    PRODUCTS_PER_PAGE = 20
+    offset = (page - 1) * PRODUCTS_PER_PAGE
+
+    # Connect to the database
+    conn, cursor = connect_to_db()
+
+    # SQL query to fetch products by wishlist name, with optional stock filter
+    if in_stock:
+        query = """
+        SELECT asin, title, price, stars, stock_status, image_url, product_link
+        FROM product_data
+        WHERE wishlist_name = %s AND stock_status = 'In Stock'
+        LIMIT %s OFFSET %s
+        """
+    else:
+        query = """
+        SELECT asin, title, price, stars, stock_status, image_url, product_link
+        FROM product_data
+        WHERE wishlist_name = %s
+        LIMIT %s OFFSET %s
+        """
+    
+    cursor.execute(query, (wishlist_name, PRODUCTS_PER_PAGE, offset))
+    products = cursor.fetchall()
+
+    # Map the results to a dictionary
+    product_list = [
+        {
+            'asin': row[0],
+            'title': row[1],
+            'price': row[2],
+            'stars': row[3],
+            'stock_status': row[4],
+            'image_url': row[5],
+            'product_link': row[6]
+        }
+        for row in products
+    ]
+
+    cursor.close()
+    conn.close()
+
+    # Check if it's an AJAX request (for infinite scroll)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(product_list)  # Return JSON data for infinite scroll
+
+    # Render the wishlist page with initial products
+    return render_template('wishlist_products.html', products=product_list, wishlist_name=wishlist_name)
+
 
 
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     search_query = request.args.get('q', '')  # Get the search query from the URL parameters
+    page = int(request.args.get('page', 1))  # Get the page number for pagination
+    in_stock = int(request.args.get('in_stock', 0))  # Fetch the in_stock filter from query params, default is 0 (show all)
+    
+    PRODUCTS_PER_PAGE = 20
+    offset = (page - 1) * PRODUCTS_PER_PAGE
+
     conn, cursor = connect_to_db()
 
-    # SQL query to search products by title or ASIN
-    search_query = f"%{search_query}%"  # Prepare for SQL LIKE statement
-    query = """
-    SELECT asin, title, price, stars, stock_status, image_url, product_link
-    FROM product_data
-    WHERE title ILIKE %s OR asin ILIKE %s
-    """
-    cursor.execute(query, (search_query, search_query))
+    # SQL query to search products by title or ASIN with optional stock filter
+    search_query_like = f"%{search_query}%"  # Prepare for SQL LIKE statement
+    if in_stock:
+        query = """
+        SELECT asin, title, price, stars, stock_status, image_url, product_link
+        FROM product_data
+        WHERE (title ILIKE %s OR asin ILIKE %s) AND stock_status = 'In Stock'
+        LIMIT %s OFFSET %s
+        """
+    else:
+        query = """
+        SELECT asin, title, price, stars, stock_status, image_url, product_link
+        FROM product_data
+        WHERE title ILIKE %s OR asin ILIKE %s
+        LIMIT %s OFFSET %s
+        """
+
+    cursor.execute(query, (search_query_like, search_query_like, PRODUCTS_PER_PAGE, offset))
     results = cursor.fetchall()
 
-    # Map the results to a dictionary to pass to the template
+    # Map the results to a dictionary
     products = [
         {
             'asin': row[0],
@@ -397,7 +481,13 @@ def search():
     cursor.close()
     conn.close()
 
+    # Check if it's an AJAX request (for infinite scroll)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(products)  # Return JSON data for infinite scroll
+
+    # Render the regular search results page (initial load)
     return render_template('search_results.html', products=products, search_query=request.args.get('q', ''))
+
 
 
 if __name__ == '__main__':

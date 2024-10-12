@@ -1,3 +1,4 @@
+<!-- base.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,32 +11,40 @@
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav>
-        <ul>
-            <li><a href="{{ url_for('index') }}">Home</a></li>
-            <li><a href="{{ url_for('top_price_changes') }}">Top Price Changes</a></li>
-            <li><a href="{{ url_for('categories') }}">Categories</a></li>
-            <li><a href="{{ url_for('search') }}">Search Products</a></li>
-        </ul>
-    </nav>
+	<div class="nav-container">
+		<nav class="nav-wrapper">
+			<ul>
+				<li><a href="{{ url_for('index') }}">Home</a></li>
+				<li><a href="{{ url_for('top_price_changes') }}">Top Price Changes</a></li>
+				<li><a href="{{ url_for('categories') }}">Categories</a></li>
+				<li>
+                <!-- Search Form -->
+                <form action="{{ url_for('search') }}" method="GET" class="search-form">
+                    <input type="text" name="q" placeholder="Search products..." required>
+                    <button type="submit">Search</button>
+                </form>
+            </li>
+			</ul>
+		</nav>
+	</div>
 
     <!-- Main Content Section -->
-    <div class="container">
+    <div class="content-wrapper">
         {% block content %}
         <!-- Page-specific content goes here -->
         {% endblock %}
     </div>
 
     <!-- Footer -->
-    <footer>
+    <footer class="footer-wrapper">
         {% block footer %}
-        <p>&copy; 2024 My Website</p>
+        <p>WIP.db &copy; 2024 All Rights Reserved.</p>
         {% endblock %}
     </footer>
 
     <!-- JavaScript -->
-	{% block scripts %}
-	<script src="{{ url_for('static', filename='js/main.js') }}"></script>
-	{% endblock %}
+    {% block scripts %}
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% endblock %}
 </body>
 </html>

@@ -2,9 +2,13 @@
 
 {% block content %}
     <h1>Wishlists</h1>
-    <ul>
+    <div class="wishlist-grid">
         {% for wishlist in wishlists %}
-        <li><a href="{{ url_for('wishlist_products', wishlist_name=wishlist) }}">{{ wishlist }}</a></li>
+        <div class="wishlist-card">
+            <a href="{{ url_for('wishlist_products', wishlist_name=wishlist) }}">
+                <h3>{{ wishlist }}</h3>
+            </a>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
 {% endblock %}

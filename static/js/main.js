@@ -1,3 +1,7 @@
+let isInStockOnly = false; // Global variable to track if "in stock only" is toggled
+
+
+
 // Infinite Scroll Function
 function attachInfiniteScroll(loadMoreCallback) {
     let loading = false;
@@ -8,7 +12,9 @@ function attachInfiniteScroll(loadMoreCallback) {
 
         if (scrollPosition >= documentHeight - 200 && !loading) {
             loading = true;
-            loadMoreCallback().finally(() => {
+
+            loadMoreCallback(isInStockOnly) // Pass in the filter state
+            .finally(() => {
                 loading = false;  // Reset loading state after fetching
             });
         }
