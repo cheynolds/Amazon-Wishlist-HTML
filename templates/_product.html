@@ -1,19 +1,44 @@
-<!-- _product.html -->
 <div class="product" data-stock-status="{{ product.stock_status }}">
-    <img src="{{ product.image_url }}" alt="{{ product.title }}">
-	
-    <h3><a href="{{ url_for('product_detail', asin=product.asin) }}">{{ product.title }}</a></h3>
-    <p><strong>Price:</strong> ${{ product.price }}</p>
-    <p><strong>Last Price Change:</strong> ${{ product.last_pricechange }}</p>
-    <p><strong>Stars:</strong> {{ product.stars }} ★</p>
-    <p><strong>Status:</strong> 
-        {% if product.stock_status == 'In Stock' %}
-            <span>In Stock</span>
-        {% else %}
-            <span>Out of Stock</span>
-        {% endif %}
-    </p>
-    <div class="product-button-container">
-        <a href="{{ product.product_link }}" target="_blank">View on Amazon</a>
-    </div>
+  <img src="{{ product.image_url }}" alt="{{ product.title }}" />
+
+  <h3>
+    <a href="{{ url_for('product_detail', asin=product.asin) }}"
+      >{{ product.title }}</a
+    >
+  </h3>
+
+  <p><strong>Price:</strong> ${{ product.price }}</p>
+  <p><strong>Price Added:</strong> ${{ product.price_added }}</p>
+  <p>
+    <strong>Last Price Change:</strong> ${{ product.last_pricechange }} ({{
+    product.last_pricechange_percent }}%)
+  </p>
+
+  <p>
+    <strong>Status:</strong>
+    {% if product.stock_status == 'In Stock' %}
+    <span>In Stock</span>
+    {% else %}
+    <span>Out of Stock</span>
+    {% endif %}
+  </p>
+
+  <p><strong>Reviews:</strong> {{ product.reviews or "N/A" }}</p>
+  <p><strong>Rating:</strong> {{ product.stars or "N/A" }} stars</p>
+
+  <p><strong>Pattern:</strong> {{ product.pattern or "N/A" }}</p>
+  <p><strong>Style:</strong> {{ product.style or "N/A" }}</p>
+  <p><strong>Wishlist:</strong> {{ product.wishlist_name or "N/A" }}</p>
+
+  <p><strong>Date Added:</strong> {{ product.date_added or "N/A" }}</p>
+  <p>
+    <strong>Last Price Check:</strong> {{ product.last_checkdate or "N/A" }}
+  </p>
+
+  <div class="product-button-container">
+    <a href="{{ product.product_link }}" target="_blank">View on Amazon</a>
+    {% if product.affiliate_link %}
+    <a href="{{ product.affiliate_link }}" target="_blank">Affiliate Link</a>
+    {% endif %}
+  </div>
 </div>

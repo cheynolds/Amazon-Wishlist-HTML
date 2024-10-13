@@ -1,11 +1,26 @@
 from datetime import datetime
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session 
 import psycopg2
-
+import os
+import random
+from dotenv import load_dotenv
+from flask_session import Session
 app = Flask(__name__)
 
-from dotenv import load_dotenv
-import os
+app.secret_key = os.urandom(24)  # Generates a random secret key each time
+
+# Configure server-side session storage
+app.config['SESSION_TYPE'] = 'filesystem'  # Use the filesystem for session storage
+Session(app)
+
+
+
+
+
+
+
+# In-memory cache to store product data by session ID
+product_cache = {}
 
 # Load environment variables from .env file
 load_dotenv()
@@ -175,71 +190,77 @@ def api_products():
 
 
 
-
-
-
 @app.route('/products')
 def products():
-    # Fetch the current page from the query parameters, default to 1
-    page = int(request.args.get('page', 1))
-    in_stock = int(request.args.get('in_stock', 0))  # Fetch the in_stock filter from query params, default is 0 (show all)
+    # Generate a new random seed every time the page is loaded
+    random_seed = str(random.randint(0, 1e6))
 
+    # Use the seed to ensure consistent randomization for this session
     PRODUCTS_PER_PAGE = 20
+    page = int(request.args.get('page', 1))
     offset = (page - 1) * PRODUCTS_PER_PAGE
 
-    # Connect to the database
+    random.seed(int(random_seed))
+
+    # Connect to the database and fetch in-stock ASINs
     conn, cursor = connect_to_db()
-
-    # Query to count the total number of products (considering in stock filter)
-    if in_stock:
-        cursor.execute("SELECT COUNT(*) FROM product_data WHERE stock_status = 'In Stock'")
-    else:
-        cursor.execute("SELECT COUNT(*) FROM product_data")
-    total_products = cursor.fetchone()[0]
-
-    # Query to fetch products for the current page (considering in stock filter)
-    if in_stock:
-        query = """
-            SELECT asin, title, price, stars, stock_status, image_url, product_link
-            FROM product_data
-            WHERE stock_status = 'In Stock'
-            ORDER BY title ASC
-            LIMIT %s OFFSET %s
-        """
-    else:
-        query = """
-            SELECT asin, title, price, stars, stock_status, image_url, product_link
-            FROM product_data
-            ORDER BY title ASC
-            LIMIT %s OFFSET %s
-        """
-
-    cursor.execute(query, (PRODUCTS_PER_PAGE, offset))
-    results = cursor.fetchall()
-
-    # Map the results to a dictionary
-    products = [
-        {
-            'asin': row[0],
-            'title': row[1],
-            'price': row[2],
-            'stars': row[3],
-            'stock_status': row[4],
-            'image_url': row[5],
-            'product_link': row[6]
-        }
-        for row in results
-    ]
-
+    cursor.execute("SELECT asin FROM product_data WHERE stock_status = 'In Stock'")
+    asins = [row[0] for row in cursor.fetchall()]
     cursor.close()
     conn.close()
 
-    # Check if it's an AJAX request (for infinite scroll)
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify(products)  # Return JSON data for infinite scroll
+    # Shuffle using the generated seed
+    random.shuffle(asins)
 
-    # Render the regular product page (initial load)
-    return render_template('products.html', products=products, total_products=total_products, PRODUCTS_PER_PAGE=PRODUCTS_PER_PAGE)
+    # Paginate the shuffled in-stock ASINs
+    paginated_asins = asins[offset:offset + PRODUCTS_PER_PAGE]
+
+    # Fetch product details for the paginated ASINs
+    if paginated_asins:
+        conn, cursor = connect_to_db()
+        cursor.execute("""
+            SELECT asin, title, subtitle, price, price_added, reviews, stars, stock_status, image_url, product_link, 
+               affiliate_link, pattern, style, wishlist_name, date_added, last_pricechange, last_pricechange_percent, last_checkdate
+            FROM product_data
+            WHERE asin = ANY(%s)
+        """, (paginated_asins,))
+        results = cursor.fetchall()
+        cursor.close()
+        conn.close()
+    else:
+        results = []
+
+    # Convert results to a list of dictionaries
+    product_list = [
+        {
+         "asin": row[0],
+         "title": row[1],
+         "subtitle": row[2],
+         "price": row[3],
+         "price_added": row[4],
+         "reviews": row[5],
+         "stars": row[6],
+         "stock_status": row[7],
+         "image_url": row[8],
+         "product_link": row[9],
+         "affiliate_link": row[10],
+         "pattern": row[11],
+         "style": row[12],
+         "wishlist_name": row[13],
+         "date_added": row[14].strftime('%Y-%m-%d') if row[14] else None,
+         "last_pricechange": row[15],
+         "last_pricechange_percent": float(row[16]) if row[16] is not None else 0.00,  # Handle decimal value
+         "last_checkdate": row[17].strftime('%Y-%m-%d') if row[17] else None  # Last price check date
+        }
+        for row in results
+    ]
+    
+    # If it's an AJAX request (for infinite scroll), return JSON data
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify(product_list)
+
+    # Render the page normally with the seed included
+    return render_template('products.html', products=product_list, seed=random_seed)
 
 
 
@@ -319,7 +340,7 @@ def product_detail(asin):
 def top_price_changes():
     # Fetch the page number from query parameters, default to 1
     page = int(request.args.get('page', 1))
-    in_stock_only = request.args.get('in_stock', '0') == '1'
+    in_stock = request.args.get('in_stock', '0') == '1'
 
     PRODUCTS_PER_PAGE = 20  # Define how many products per page
     offset = (page - 1) * PRODUCTS_PER_PAGE
@@ -327,15 +348,19 @@ def top_price_changes():
     # Connect to the database
     conn, cursor = connect_to_db()
 
-    # Modify the query to filter by stock status if needed
+    # Adjust the query based on the in_stock filter and sort by `last_pricechange_percent`
     query = """
         SELECT asin, title, price, last_pricechange, last_pricechange_percent, stars, stock_status, image_url, product_link
         FROM product_data
     """
-    if in_stock_only:
-        query += " WHERE stock_status = 'In Stock' "
+    if in_stock:
+        query += " WHERE stock_status = 'In Stock'"
 
-    query += " ORDER BY last_pricechange_percent ASC LIMIT %s OFFSET %s"
+    # Sort by `last_pricechange_percent` descending (biggest price changes first)
+    query += """
+        ORDER BY last_pricechange_percent DESC
+        LIMIT %s OFFSET %s
+    """
 
     cursor.execute(query, (PRODUCTS_PER_PAGE, offset))
     
@@ -363,6 +388,7 @@ def top_price_changes():
 
     # Otherwise, render the page normally with the initial products
     return render_template('top_price_changes.html', products=product_list)
+
 
 
 

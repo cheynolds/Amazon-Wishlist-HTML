@@ -1,50 +1,110 @@
 <!-- base.html -->
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}My Website{% endblock %}</title>
-
+  <head>
     <!-- Link to external stylesheets -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}WIPdb{% endblock %}</title>
+    <!-- Standard Favicon -->
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+    />
+
+    <!-- For Google Chrome, Firefox, etc. -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="{{ url_for('static', filename='favicon-16x16.png') }}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="{{ url_for('static', filename='favicon-32x32.png') }}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="96x96"
+      href="{{ url_for('static', filename='favicon-96x96.png') }}"
+    />
+
+    <!-- For Android Chrome (192x192) -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="{{ url_for('static', filename='favicon-192x192.png') }}"
+    />
+
+    <!-- For Apple Touch Icons -->
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="{{ url_for('static', filename='favicon-180x180.png') }}"
+    />
+
+    <!-- For Windows (optional, if you have Microsoft tiles) -->
+    <meta
+      name="msapplication-TileImage"
+      content="{{ url_for('static', filename='favicon-512x512.png') }}"
+    />
+  </head>
+  <body>
     <!-- Navigation Bar -->
-	<div class="nav-container">
-		<nav class="nav-wrapper">
-			<ul>
-				<li><a href="{{ url_for('index') }}">Home</a></li>
-				<li><a href="{{ url_for('top_price_changes') }}">Top Price Changes</a></li>
-				<li><a href="{{ url_for('categories') }}">Categories</a></li>
-				<li>
-                <!-- Search Form -->
-                <form action="{{ url_for('search') }}" method="GET" class="search-form">
-                    <input type="text" name="q" placeholder="Search products..." required>
-                    <button type="submit">Search</button>
-                </form>
-            </li>
-			</ul>
-		</nav>
-	</div>
+    <div class="nav-container">
+      <nav class="nav-wrapper">
+        <ul>
+          <li><a href="{{ url_for('index') }}">Home</a></li>
+          <li>
+            <a href="{{ url_for('top_price_changes') }}">Top Price Changes</a>
+          </li>
+          <li><a href="{{ url_for('categories') }}">Categories</a></li>
+          <li>
+            <!-- Search Form -->
+            <form
+              action="{{ url_for('search') }}"
+              method="GET"
+              class="search-form"
+            >
+              <input
+                type="text"
+                name="q"
+                placeholder="Search products..."
+                required
+              />
+              <button type="submit">Search</button>
+            </form>
+          </li>
+        </ul>
+      </nav>
+    </div>
 
     <!-- Main Content Section -->
     <div class="content-wrapper">
-        {% block content %}
-        <!-- Page-specific content goes here -->
-        {% endblock %}
+      {% block content %}
+      <!-- Page-specific content goes here -->
+      {% endblock %}
     </div>
 
     <!-- Footer -->
     <footer class="footer-wrapper">
-        {% block footer %}
-        <p>WIP.db &copy; 2024 All Rights Reserved.</p>
-        {% endblock %}
+      {% block footer %}
+      <p>WIP.db &copy; 2024 All Rights Reserved.</p>
+      {% endblock %}
     </footer>
 
     <!-- JavaScript -->
     {% block scripts %}
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% endblock %}
-</body>
+  </body>
 </html>

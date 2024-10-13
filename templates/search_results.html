@@ -1,85 +1,113 @@
-{% extends 'base.html' %}
-
-{% block title %}Search Results{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% block title %}Search Results{% endblock %} {% block
+content %}
 <h1>Search Results for "{{ search_query }}"</h1>
 
 <!-- In Stock Toggle Button -->
-<button class="toggle-button" id="toggleInStock" onclick="toggleInStock()">Show In Stock Only</button>
+<button class="toggle-button" id="toggleInStock" onclick="toggleInStock()">
+  Show In Stock Only
+</button>
 
 <!-- Product Grid -->
 <div class="product-grid" id="product-grid">
-    {% if products %}
-        {% for product in products %}
-            {% include '_product.html' %}
-        {% endfor %}
-    {% else %}
-        <p>No products found for "{{ search_query }}".</p>
-    {% endif %}
+  {% if products %} {% for product in products %} {% include '_product.html' %}
+  {% endfor %} {% else %}
+  <p>No products found for "{{ search_query }}".</p>
+  {% endif %}
 </div>
 
 <!-- Loading Spinner -->
-<div id="loading" style="display: none;">
-    <p>Loading more products...</p>
+<div id="loading" style="display: none">
+  <p>Loading more products...</p>
 </div>
 
 <!-- Scroll to Top Button -->
-<button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()">▲ Go to Top</button>
-{% endblock %}
-
-{% block scripts %}
+<button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()">
+  ▲ Go to Top
+</button>
+{% endblock %} {% block scripts %}
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script>
-	document.addEventListener('DOMContentLoaded', function() {
-	    let currentPage = 1;
-	    const productsPerPage = 20;
-	    let isInStockOnly = false;  // Track if the in-stock filter is active
+  let currentPage = 1;
+  const productsPerPage = 20;
+  let isInStockOnly = false; // Track if the in-stock filter is active
 
-	    // Infinite scroll logic
-	    attachInfiniteScroll(() => {
-	        currentPage += 1;
-	        const url = `/search?q={{ search_query }}&page=${currentPage}&in_stock=${isInStockOnly ? 1 : 0}`;
+  // Infinite scroll logic
+  attachInfiniteScroll(() => {
+    currentPage += 1;
+    const url = `/search?q={{ search_query }}&page=${currentPage}&in_stock=${
+      isInStockOnly ? 1 : 0
+    }`;
 
-	        return fetch(url, {
-	            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-	        })
-	        .then(response => response.json())
-	        .then(data => {
-	            const productGrid = document.getElementById('product-grid');
-	            if (!productGrid) {
-	                console.error("product-grid element not found.");
-	                return;
-	            }
+    return fetch(url, {
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const productGrid = document.getElementById("product-grid");
+        if (!productGrid) {
+          console.error("product-grid element not found.");
+          return;
+        }
 
-	            data.forEach(product => {
-	                const productDiv = document.createElement('div');
-	                productDiv.classList.add('product');
-	                productDiv.setAttribute('data-stock-status', product.stock_status);
-	                productDiv.innerHTML = `
-	                    <img src="${product.image_url}" alt="${product.title}">
-	                    <h3><a href="/product/${product.asin}">${product.title}</a></h3>
-	                    <p><strong>Price:</strong> $${product.price}</p>
-	                    <p><strong>Status:</strong> ${product.stock_status === 'In Stock' ? 'In Stock' : 'Out of Stock'}</p>
-	                    <div class="product-button-container">
-	                        <a href="${product.product_link}" target="_blank">View on Amazon</a>
-	                    </div>`;
-	                productGrid.appendChild(productDiv);
-	            });
-	        });
-	    });
+        data.forEach((product) => {
+          const productDiv = document.createElement("div");
+          productDiv.classList.add("product");
+          productDiv.setAttribute("data-stock-status", product.stock_status);
+          productDiv.innerHTML = `
+					<img src="${product.image_url}" alt="${product.title}">
+					<h3><a href="/product/${product.asin}">${product.title}</a></h3>
+					<p><strong>Price:</strong> $${product.price}</p>
+					<p><strong>Status:</strong> ${
+            product.stock_status === "In Stock" ? "In Stock" : "Out of Stock"
+          }</p>
+					<div class="product-button-container">
+						<a href="${product.product_link}" target="_blank">View on Amazon</a>
+					</div>`;
+          productGrid.appendChild(productDiv);
+        });
+      });
+  });
 
-	    // Toggle In Stock Filter
-	    const toggleButton = document.getElementById('toggleInStock');
-	    toggleButton.addEventListener('click', function() {
-	        isInStockOnly = !isInStockOnly;
-	        toggleButton.textContent = isInStockOnly ? "Show All Products" : "Show In Stock Only";
+  // Toggle In Stock Filter
+  const toggleButton = document.getElementById("toggleInStock");
+  toggleButton.addEventListener("click", function () {
+    isInStockOnly = !isInStockOnly;
+    toggleButton.textContent = isInStockOnly
+      ? "Show All Products"
+      : "Show In Stock Only";
 
-	        // Re-fetch the first page of products with the updated filter
-	        currentPage = 1;
-	        document.getElementById('product-grid').innerHTML = '';  // Clear existing products
-	        loadMoreProducts(isInStockOnly);  // Load first page with filter applied
-	    });
-	});
+    // Re-fetch the first page of products with the updated filter
+    currentPage = 1;
+    const productGrid = document.getElementById("product-grid");
+    productGrid.innerHTML = ""; // Clear existing products
+
+    // Fetch new set of products based on the current filter
+    const url = `/search?q={{ search_query }}&page=1&in_stock=${
+      isInStockOnly ? 1 : 0
+    }`;
+
+    fetch(url, {
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        data.forEach((product) => {
+          const productDiv = document.createElement("div");
+          productDiv.classList.add("product");
+          productDiv.setAttribute("data-stock-status", product.stock_status);
+          productDiv.innerHTML = `
+					<img src="${product.image_url}" alt="${product.title}">
+					<h3><a href="/product/${product.asin}">${product.title}</a></h3>
+					<p><strong>Price:</strong> $${product.price}</p>
+					<p><strong>Status:</strong> ${
+            product.stock_status === "In Stock" ? "In Stock" : "Out of Stock"
+          }</p>
+					<div class="product-button-container">
+						<a href="${product.product_link}" target="_blank">View on Amazon</a>
+					</div>`;
+          productGrid.appendChild(productDiv);
+        });
+      });
+  });
 </script>
 {% endblock %}

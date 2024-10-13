@@ -1,393 +1,285 @@
 /* Global Styles */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #d0d0d0;
+  margin: 0;
+  padding: 0;
 }
 
-/* Adjust navigation links within the larger nav bar */
-/* Increase the size of the navigation bar */
+/* Navigation Bar Styling */
 .nav-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: #333;
-    z-index: 999;
-    height: 80px; /* Increased the height of the nav bar */
-    display: flex;
-    align-items: center; /* Vertically align content */
-}
-/* Styling for the search form */
-.search-form {
-    display: inline-block;
-    position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #333;
+  z-index: 999;
+  height: 80px;
+  display: flex;
+  align-items: center;
 }
 
-.search-form input[type="text"] {
-    padding: 8px;
-    font-size: 14px;
-    border-radius: 5px 0 0 5px;
-    border: 1px solid #ccc;
-    width: 200px;
-}
-
-.search-form button {
-    padding: 8px 12px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 0 5px 5px 0;
-    cursor: pointer;
-}
-
-.search-form button:hover {
-    background-color: #0056b3;
-}
-
-/* Align the search form with the rest of the navigation items */
+/* Navigation Menu */
 nav ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    align-items: center;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-left: 20px;
 }
 
 nav ul li {
-    margin-right: 20px;
-}
-
-nav ul li a, .search-form button {
-    text-decoration: none;
-    font-size: 16px;
-    color: white;
-}
-
-nav ul li a:hover, .search-form button:hover {
-    text-decoration: underline;
-}
-
-/* Adjust navigation links within the larger nav bar and left align the menu */
-nav ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    align-items: left; /* Vertically center the list items */
-    height: 100%; /* Ensure the list fills the height of the nav bar */
-    padding-left: 20px; /* Add some padding from the left edge */
-}
-
-nav ul li {
-    display: inline;
-    margin-right: 20px;
+  margin-right: 20px;
 }
 
 nav ul li a {
-    color: white;
-    text-decoration: none;
-    font-size: 1.2rem; /* You can increase font size */
+  color: white;
+  text-decoration: none;
+  font-size: 1.2rem;
 }
 
-
-/* Wishlist Grid */
-.wishlist-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 20px;  /* Space between cards */
-    padding: 20px;
+nav ul li a:hover {
+  text-decoration: underline;
 }
 
-.wishlist-card {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 15px;
-    text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+/* Search Form Styling */
+.search-form {
+  display: inline-block;
+  position: relative;
 }
 
-.wishlist-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+.search-form input[type="text"] {
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 5px 0 0 5px;
+  border: 1px solid #ccc;
+  width: 200px;
 }
 
-.wishlist-card h3 {
-    font-size: 1.2rem;
-    margin: 10px 0;
-    color: #333;
+.search-form button {
+  padding: 8px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
 }
 
-.wishlist-card a {
-    text-decoration: none;
-    color: inherit;
+.search-form button:hover {
+  background-color: #0056b3;
 }
 
-
-.content {
-    padding: 20px;
-}
-.nav-wrapper {
-    max-width: 100%;  /* Limit max width for better alignment */
-    margin: 0 auto;  /* Center horizontally */
-    padding-left: 0px;  /* Adjust left padding as needed */
-    padding-right: 0px; /* Adjust right padding if needed */
+/* Content Wrappers */
+.nav-wrapper,
+.footer-wrapper {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
 }
 
 .content-wrapper {
-    padding-top: 80px; /* Adjust this value based on the height of your nav bar */
-    max-width: 1200px;
-    margin: 0 auto;
-    padding-left: 0px;
-    padding-right: 0px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 75px 0px;
 }
 
-/* Wrapper for consistent padding */
-.footer-wrapper {
-    max-width: 100%;  /* Limit max width for better alignment */
-    margin: 0 auto;  /* Center horizontally */
-    padding-left: 0px;  /* Adjust left padding as needed */
-    padding-right: 0px; /* Adjust right padding if needed */
-}
-
+/* Footer Styling */
 footer {
-    text-align: center;
-    padding: 10px;
-    background-color: #333;
-    color: white;
+  text-align: center;
+  padding: 20px;
+  background-color: #333;
+  color: white;
+}
+
+/* Wishlist Grid Styling */
+.wishlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.wishlist-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.wishlist-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.wishlist-card h3 {
+  font-size: 1.2rem;
+  margin: 10px 0;
+  color: #333;
+}
+
+.wishlist-card a {
+  text-decoration: none;
+  color: inherit;
 }
 
 /* Category Styling */
 .category-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-}
-
-.category-group {
-    margin-bottom: 15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
 }
 
 .collapsible {
-    background-color: #777;
-    color: white;
-    cursor: pointer;
-    padding: 10px;
-    width: 100%;
-    border: none;
-    text-align: left;
-    font-size: 16px;
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 10px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  font-size: 16px;
 }
 
 .collapsible + .content {
-    padding: 0 18px;
-    display: none;
-    overflow: hidden;
-    background-color: #f1f1f1;
-}
-
-.content ul {
-    list-style: none;
-    padding-left: 0;
-}
-
-.content ul li {
-    margin-bottom: 10px;
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
+  background-color: #f1f1f1;
 }
 
 /* Product Grid Styling */
 .product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 50px 20px; /* Horizontal and vertical gaps between products */
-    padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 58px 15px;
+  padding: 20px;
+  width: calc(100% - 80px);
+  margin-left: 0px;
 }
 
-/* Product Styling */
+/* Product Card Styling */
 .product {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .product img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 10px;
-    object-fit: cover;
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  object-fit: cover;
 }
 
 .product h3 {
-    font-size: 1.2rem;
-    margin: 10px 0;
-    color: #333;
+  font-size: 1.2rem;
+  margin: 10px 0;
+  color: #333;
 }
 
 .product p {
-    font-size: 1rem;
-    margin: 8px 0;
-    color: #666;
+  font-size: 1rem;
+  margin: 8px 0;
+  color: #666;
 }
 
-/* Button container styling */
 .product-button-container {
-    margin-top: auto; /* Push the button container to the bottom */
+  margin-top: auto;
 }
 
 .product-button-container a {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
 }
 
 .product-button-container a:hover {
-    background-color: #0056b3;
+  background-color: #0056b3;
 }
 
 .product:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-/* Sort and Toggle Buttons */
-.sort-button, .toggle-button {
-    margin: 10px 0;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.sort-button:hover, .toggle-button:hover {
-    background-color: #0056b3;
-}
-
-.toggle-button.active {
-    background-color: #28a745;
-}
-
-/* Responsive Styling for Larger Screens */
-@media (min-width: 768px) {
-    .product-grid {
-        padding: 40px;
-    }
-
-    .product {
-        padding: 20px;
-    }
-}
-
-/* Product Detail Page */
-.product-detail-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-    padding: 20px;
-}
-
-.product-detail-box {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.product-detail-box img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 10px;
-    object-fit: cover;
-}
-
-.product-detail-box h3 {
-    font-size: 1.5rem;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 /* Scroll to Top Button Styling */
 .scroll-top-btn {
-    position: fixed;
-    bottom: 40px;
-    right: 40px;
-    display: none;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 50px;
-    cursor: pointer;
-    font-size: 16px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s ease, transform 0.3s ease;
-    z-index: 999; /* Ensure it appears above all elements */
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  display: none;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  z-index: 999;
 }
 
 .scroll-top-btn:hover {
-    background-color: #0056b3;
-    transform: translateY(-3px);
+  background-color: #0056b3;
+  transform: translateY(-3px);
 }
 
 .scroll-top-btn:active {
-    transform: translateY(1px);
+  transform: translateY(1px);
 }
 
-
-
-/* Toggle Button Styles */
-.toggle-button {
-    margin: 10px 0;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.toggle-button.active {
-    background-color: #28a745;
-}
-
-.toggle-button:hover {
-    background-color: #0056b3;
-}
-
-/* Make sure buttons and titles have consistent margins */
-h1, h2, .button, .toggle-button {
-    margin-left: 20px;  /* Adjust this to match your content-wrapper padding */
-}
-
-/* Responsive adjustments for smaller screens */
+/* Responsive Styling */
 @media (max-width: 768px) {
-    nav ul {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+  nav ul {
+    flex-direction: column;
+    align-items: center;
+  }
 
-    nav ul li {
-        margin-bottom: 10px;
-    }
+  nav ul li {
+    margin-bottom: 10px;
+  }
 
-    .content-wrapper {
-        padding-top: 80px; /* Slightly more padding if your nav expands vertically */
-    }
+  .content-wrapper {
+    padding-top: 80px;
+  }
+}
+
+@media (min-width: 768px) {
+  .product-grid {
+    padding: 37px;
+  }
+
+  .product {
+    padding: 20px;
+  }
+}
+
+/* Footer adjustments for consistency */
+footer {
+  padding: 20px;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #333;
+}
+/* Title Styling */
+h1 {
+  margin-left: 50px;
+  margin-bottom: -20px;
 }
